@@ -29,14 +29,18 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const post = req.body;
-    if (post.title && post.contents) {
-      const postId = await postsModel.insert(post);
-      res.status(201).json({ ...postId, ...post });
-    } else {
+    const { title, contents } = req.body;
+    if (!title || !contents) {
       res.status(400).json({
         message: "Lütfen gönderi için bir title ve contents sağlayın",
       });
+    } else {
+      const insertedId = await postsModel.insert({
+        title: title,
+        contents: contents,
+      });
+      const insertedPost = await postsModel.findById(insertedId.id);
+      res.status(201).json(insertedPost);
     }
   } catch (error) {
     res
